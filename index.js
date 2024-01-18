@@ -40,6 +40,8 @@ const recipeCollection = client.db("delishDb").collection("allRecipes");
 //for fetching all the recipies or individual recipie per query
 app.get('/allRecipes',async(req,res)=>{
       const id=req.query.meal
+    
+
       let filter={}
       if(id){
         filter={_id:new ObjectId(id)}
@@ -48,6 +50,25 @@ app.get('/allRecipes',async(req,res)=>{
       res.send(allRecipes)
   })
 
+// for filtering data according to search input
+app.get('/allRecipe',async(req,res)=>{
+      const value=req.query.value
+      console.log(value)
+    
+
+      let filter={}
+      if(value){
+       
+        filter = {
+          name: { $regex: value, $options: 'i' }
+        };
+      }
+      const allRecipes=await recipeCollection.find(filter).toArray()
+      res.send(allRecipes)
+  })
+
+
+  //for editing recipie information
   app.patch('/allRecipes',async (req, res) => {
     const id = req.query.recipeId;
     const recipe=req.body
@@ -66,13 +87,22 @@ app.get('/allRecipes',async(req,res)=>{
   })
 
 
+//for creating recipe
+app.post('/allRecipes',async(req,res)=>{
+    const data=req.body
+    console.log(data)
+    const meal=await recipeCollection.insertOne(data)
+   
+    res.send(meal)
+
+})
+
 //for deleting a recipie
 app.delete('/allRecipes/:id',async(req,res)=>{
     const id=req.params.id
-    // console.log(id,"from server")
+  
     const  filter={_id:new ObjectId(id)}
     const recipe=await recipeCollection.deleteOne(filter)
-    // console.log("done")
    
     res.send(recipe)
 })
